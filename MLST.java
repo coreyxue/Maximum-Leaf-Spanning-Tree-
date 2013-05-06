@@ -278,7 +278,10 @@ public class MLST {
 		
 		//====================================
 		while(true)
+		//for(Integer vn: V)
 		{
+			//IN.add(vn);
+			//BN.addAll(E.get(vn));
 			Apply_Reduc_Rules(E,V,IN,LN,BN,FL,Free);//Reduce G according to the reduction rules
 			TreeSet<Integer> fUfl = new TreeSet<Integer>(FL);// Free union FL
 			fUfl.addAll(Free);
@@ -565,85 +568,33 @@ public class MLST {
 	}
 	public static ArrayList<Integer> max_path_Free(Integer v,Hashtable<Integer,TreeSet<Integer>>E, TreeSet<Integer> V,TreeSet<Integer>IN,TreeSet<Integer>LN,TreeSet<Integer>BN,TreeSet<Integer>FL,TreeSet<Integer>Free)
 	{
-		/*Hashtable<Integer,Integer> visited = new Hashtable<Integer,Integer>();
-		for(Integer key:E.keySet())
-			visited.put(key, 0);
-		Queue<Integer> queue = new LinkedList<Integer>();
 		ArrayList<Integer> max_path = new ArrayList<Integer>();
-		queue.add(v);
-		//int counter=0;
-		while(!queue.isEmpty())
-		{
-			Integer temp = queue.poll();
-			visited.put(temp, 1);
-			TreeSet<Integer> nei = new TreeSet<Integer>(E.get(temp));
-			for(Integer node: nei)
-			{
-				if(Free.contains(node) && get_degree(node,E,V,IN,LN,BN,FL,Free)==2 && visited.get(node)==0)
-				{
-					//counter++;
-					max_path.add(node);
-					queue.add(node);
-				}
-			}
-		}
-		return max_path;*/
-		ArrayList<Integer> max_path = new ArrayList<Integer>();
-		ArrayList<Integer> temp_max_path = new ArrayList<Integer>();
-		//int max = 2;
-		//int cur_len = 2;
 		max_path.add(v);
-		temp_max_path.add(v);
+		//temp_max_path.add(v);
 		Integer Nv = E.get(v).first();
-		max_path.add(Nv);
-		//temp_max_path.add(Nv);
-		Hashtable<Integer,Integer> visited = new Hashtable<Integer,Integer>();
-		
-		if(Free.contains(Nv))
+		if (Free.contains(Nv) && get_degree(Nv,E,V,IN,LN,BN,FL,Free)==2)
 		{
 			max_path.add(Nv);
-			temp_max_path.add(Nv);
-			//max = 2;
-			//cur_len = 2;
-		}else{
-			return max_path;
-		}
-		
-		for(Integer n:E.get(Nv))
-		{
-			for(Integer node:E.keySet())
-				visited.put(node, 0);
-			explore1(n,E,V,IN,LN,BN,FL,Free,temp_max_path,visited);
-			if(temp_max_path.size()>max_path.size())
-			{
-				max_path = new ArrayList<Integer>(temp_max_path);
-				temp_max_path = new ArrayList<Integer>();
+			for(Integer n:E.get(Nv))
+			{	
+			    if(Free.contains(n) && get_degree(n,E,V,IN,LN,BN,FL,Free)==2)
+				{	
+			    	max_path.add(n);
+					explore1(n,Nv, E,V,IN,LN,BN,FL,Free,max_path);
+				}
 			}
 		}
 		return max_path;
 	}
-	public static void explore1(Integer node,Hashtable<Integer,TreeSet<Integer>>E, TreeSet<Integer> V,TreeSet<Integer>IN,TreeSet<Integer>LN,TreeSet<Integer>BN,TreeSet<Integer>FL,TreeSet<Integer>Free,ArrayList<Integer> temp_max_path,Hashtable<Integer,Integer> visited)
+	public static void explore1(Integer node,Integer prev_node,Hashtable<Integer,TreeSet<Integer>>E, TreeSet<Integer> V,TreeSet<Integer>IN,TreeSet<Integer>LN,TreeSet<Integer>BN,TreeSet<Integer>FL,TreeSet<Integer>Free,ArrayList<Integer> max_path)
 	{
 		for(Integer nei: E.get(node))
 		{
-			if(Free.contains(nei) && get_degree(nei,E,V,IN,LN,BN,FL,Free)==2 && visited.get(nei)==0)
+			if(Free.contains(nei) && get_degree(nei,E,V,IN,LN,BN,FL,Free)==2 && nei!=prev_node)
 			{
-				temp_max_path.add(nei);
-				visited.put(nei, 1);
-				explore1(nei,E,V,IN,LN,BN,FL,Free,temp_max_path,visited);
+				max_path.add(nei);
+				explore1(nei, node, E,V,IN,LN,BN,FL,Free, max_path);
 			}
 		}
 	}
-	/*public static void explore2(Integer node,Hashtable<Integer,TreeSet<Integer>>E, TreeSet<Integer> V,TreeSet<Integer>IN,TreeSet<Integer>LN,TreeSet<Integer>BN,TreeSet<Integer>FL,TreeSet<Integer>Free,ArrayList<Integer> temp_max_path,Hashtable<Integer,Integer> visited)
-	{
-		for(Integer nei: E.get(node))
-		{
-			if(Free.contains(nei) && get_degree(nei,E,V,IN,LN,BN,FL,Free)==2 && visited.get(nei)==0)
-			{
-				temp_max_path.add(nei);
-				visited.put(nei, 1);
-				explore1(nei,E,V,IN,LN,BN,FL,Free,temp_max_path,visited);
-			}
-		}
-	}*/
 }

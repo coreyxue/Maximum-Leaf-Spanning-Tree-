@@ -95,6 +95,7 @@ public class MLST {
 		}
 		//=================== RULE 4 ================
 		TreeSet<Integer> temp = new TreeSet<Integer>(Free);
+		TreeSet<Integer> Free_copy = new TreeSet<Integer>(Free);
 		temp.addAll(FL);
 		for(Integer u : Free)
 		{
@@ -105,10 +106,11 @@ public class MLST {
 				if(temp.equals(E.get(v)))
 				{
 					FL.add(v);
-					Free.remove(v);
+					Free_copy.remove(v);
 				}
 			}
 		}
+		Free = new TreeSet<Integer>(Free_copy);
 		//=================== RULE 5 ================
 		for(Integer x : Free)
 		{
@@ -121,14 +123,17 @@ public class MLST {
 						if(E.get(z).contains(x))
 						{
 							FL.add(x);
-							Free.remove(x);
+							Free_copy.remove(x);
 						}
 					}
 				}
 			}
 		}
+		//Free = new TreeSet<Integer>(Free_copy);
+		Free = Free_copy;
 		//=================== RULE 6 ================
 		Hashtable<Integer,Integer> visited = new Hashtable<Integer,Integer>();
+		TreeSet<Integer> BN_copy = new TreeSet<Integer>(BN);
 		for(Integer u:BN)
 		{
 			for(Integer v:E.keySet())
@@ -150,12 +155,14 @@ public class MLST {
 			{
 				//u--->IN
 				IN.add(u);
-				BN.remove(u);
+				BN_copy.remove(u);
 			}
 		}
+		BN = BN_copy;
 		//=================== RULE 7 ================
 		TreeSet<Integer> tem = new TreeSet<Integer>(V);
 		tem.removeAll(IN);
+		TreeSet<Integer> nei_u = new TreeSet<Integer>(E.get(u));
 		for(Integer u : LN)
 		{
 			for(Integer v:E.get(u))
@@ -560,7 +567,7 @@ public class MLST {
 		temp_max_path.add(v);
 		Integer Nv = E.get(v).first();
 		max_path.add(Nv);
-		temp_max_path.add(Nv);
+		//temp_max_path.add(Nv);
 		Hashtable<Integer,Integer> visited = new Hashtable<Integer,Integer>();
 		
 		if(Free.contains(Nv))

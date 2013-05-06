@@ -50,128 +50,157 @@ public class MLST {
 	public static void Apply_Reduc_Rules(Hashtable<Integer,TreeSet<Integer>>E, TreeSet<Integer> V,TreeSet<Integer>IN,TreeSet<Integer>LN,TreeSet<Integer>BN,TreeSet<Integer>FL,TreeSet<Integer>Free)
 	{
 		//=============== RULE 1 ==============
-		for(Integer u : FL)
 		{
-			for(Integer v:E.get(u))
+			for(Integer u : FL)
 			{
-				if(FL.contains(v))
+				TreeSet<Integer> nei_u = new TreeSet<Integer>(E.get(u));
+				for(Integer v:E.get(u))
 				{
-					E.get(u).remove(v);
-					E.get(v).remove(u);
+					if(FL.contains(v))
+					{
+						//E.get(u).remove(v);
+						//E.get(v).remove(u);
+						nei_u.remove(v);
+						nei_u.remove(u);
+					}
 				}
+				E.put(u, nei_u);
 			}
-		}
-		for(Integer u : BN)
-		{
-			for(Integer v:E.get(u))
+			for(Integer u : BN)
 			{
-				if(BN.contains(v))
+				TreeSet<Integer> nei_u = new TreeSet<Integer>(E.get(u));
+				for(Integer v:E.get(u))
 				{
-					E.get(u).remove(v);
-					E.get(v).remove(u);
+					if(BN.contains(v))
+					{
+						//E.get(u).remove(v);
+						//E.get(v).remove(u);
+						nei_u.remove(v);
+						nei_u.remove(u);
+					}
 				}
+				E.put(u, nei_u);
 			}
 		}
 		//==================== RULE 2 ============
-		for(Integer u : BN)
 		{
-			if(get_degree(u,E,V,IN,LN,BN,FL,Free)==0)
+			TreeSet<Integer> BN_copy = new TreeSet<Integer>(BN);
+			for(Integer u : BN)
 			{
-				LN.add(u);
-				BN.remove(u);
-				Free.remove(u);
-				
-			}
-		}
-		//=================== RULE 3 ================
-		for(Integer u : Free)
-		{
-			if(get_degree(u,E,V,IN,LN,BN,FL,Free)==1)
-			{
-				FL.add(u);
-				BN.remove(u);
-				Free.remove(u);
-			}
-		}
-		//=================== RULE 4 ================
-		TreeSet<Integer> temp = new TreeSet<Integer>(Free);
-		TreeSet<Integer> Free_copy = new TreeSet<Integer>(Free);
-		temp.addAll(FL);
-		for(Integer u : Free)
-		{
-			for(Integer v : E.get(u))
-			{
-				//if(!temp.contains(v))
-				temp.retainAll(E.get(v));
-				if(temp.equals(E.get(v)))
+				if(get_degree(u,E,V,IN,LN,BN,FL,Free)==0)
 				{
-					FL.add(v);
-					Free_copy.remove(v);
+					LN.add(u);
+					BN_copy.remove(u);
+					Free.remove(u);
 				}
 			}
+			BN = BN_copy;
 		}
-		Free = new TreeSet<Integer>(Free_copy);
-		//=================== RULE 5 ================
-		for(Integer x : Free)
+		//=================== RULE 3 ================
 		{
-			if(get_degree(x,E,V,IN,LN,BN,FL,Free)==2)
+			TreeSet<Integer> Free_copy = new TreeSet<Integer>(Free);
+			for(Integer u : Free)
 			{
-				for(Integer y: E.get(x))
+				if(get_degree(u,E,V,IN,LN,BN,FL,Free)==1)
 				{
-					for(Integer z: E.get(y))
+					FL.add(u);
+					BN.remove(u);
+					Free_copy.remove(u);
+				}
+			}
+			Free = Free_copy;
+		}
+		//=================== RULE 4 ================
+		{
+			TreeSet<Integer> temp = new TreeSet<Integer>(Free);
+			TreeSet<Integer> Free_copy = new TreeSet<Integer>(Free);
+			temp.addAll(FL);
+			for(Integer u : Free)
+			{
+				for(Integer v : E.get(u))
+				{
+					//if(!temp.contains(v))
+					temp.retainAll(E.get(v));
+					if(temp.equals(E.get(v)))
 					{
-						if(E.get(z).contains(x))
+						FL.add(v);
+						Free_copy.remove(v);
+					}
+				}
+			}
+			Free = new TreeSet<Integer>(Free_copy);
+		}
+		//=================== RULE 5 ================
+		{
+			TreeSet<Integer> Free_copy = new TreeSet<Integer>(Free);
+			for(Integer x : Free)
+			{
+				if(get_degree(x,E,V,IN,LN,BN,FL,Free)==2)
+				{
+					for(Integer y: E.get(x))
+					{
+						for(Integer z: E.get(y))
 						{
-							FL.add(x);
-							Free_copy.remove(x);
+							if(E.get(z).contains(x))
+							{
+								FL.add(x);
+								Free_copy.remove(x);
+							}
 						}
 					}
 				}
 			}
+			//Free = new TreeSet<Integer>(Free_copy);
+			Free = Free_copy;
 		}
-		//Free = new TreeSet<Integer>(Free_copy);
-		Free = Free_copy;
 		//=================== RULE 6 ================
-		Hashtable<Integer,Integer> visited = new Hashtable<Integer,Integer>();
-		TreeSet<Integer> BN_copy = new TreeSet<Integer>(BN);
-		for(Integer u:BN)
 		{
-			for(Integer v:E.keySet())
-				visited.put(v, 0);
-			Queue<Integer> s = new LinkedList<Integer>();
-			s.add(E.get(u).first());
-			visited.put(E.get(u).first(),1);
-			while(s.size()!=0)   //?????????????????
+			Hashtable<Integer,Integer> visited = new Hashtable<Integer,Integer>();
+			TreeSet<Integer> BN_copy = new TreeSet<Integer>(BN);
+			for(Integer u:BN)
 			{
-				Integer t = s.poll();
-				visited.put(t, 1);
-				for(Integer n:E.get(t))
+				for(Integer v:E.keySet())
+					visited.put(v, 0);
+				Queue<Integer> s = new LinkedList<Integer>();
+				s.add(E.get(u).first());
+				visited.put(E.get(u).first(),1);
+				while(s.size()!=0)   //?????????????????
 				{
-					if(n!=u && visited.get(n)==0)
-						s.add(n);
+					Integer t = s.poll();
+					visited.put(t, 1);
+					for(Integer n:E.get(t))
+					{
+						if(n!=u && visited.get(n)==0)
+							s.add(n);
+					}
+				}
+				if(visited.contains(0))
+				{
+					//u--->IN
+					IN.add(u);
+					BN_copy.remove(u);
 				}
 			}
-			if(visited.contains(0))
-			{
-				//u--->IN
-				IN.add(u);
-				BN_copy.remove(u);
-			}
+			BN = BN_copy;
 		}
-		BN = BN_copy;
 		//=================== RULE 7 ================
-		TreeSet<Integer> tem = new TreeSet<Integer>(V);
-		tem.removeAll(IN);
-		TreeSet<Integer> nei_u = new TreeSet<Integer>(E.get(u));
-		for(Integer u : LN)
 		{
-			for(Integer v:E.get(u))
+			TreeSet<Integer> tem = new TreeSet<Integer>(V);
+			tem.removeAll(IN);
+			for(Integer u : LN)
 			{
-				if(tem.contains(v))
+				TreeSet<Integer> nei_u = new TreeSet<Integer>(E.get(u));
+				for(Integer v:E.get(u))
 				{
-					E.get(u).remove(v);
-					E.get(v).remove(u);
+					if(tem.contains(v))
+					{
+						//E.get(u).remove(v);
+						//E.get(v).remove(u);
+						nei_u.remove(v);
+						nei_u.remove(u);
+					}
 				}
+				E.put(u, nei_u);
 			}
 		}
 	}

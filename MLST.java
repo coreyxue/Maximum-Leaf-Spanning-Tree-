@@ -265,269 +265,256 @@ public class MLST {
 			V.add(value);
 		}
 	}
-	public static int mlst(ArrayList<String> input,Hashtable<Integer,TreeSet<Integer>> E)
+	public static int mlst(Integer vn,Hashtable<Integer,TreeSet<Integer>> E, TreeSet<Integer> V,TreeSet<Integer>IN,TreeSet<Integer>LN,TreeSet<Integer>BN,TreeSet<Integer>FL,TreeSet<Integer>Free)
 	{
-		TreeSet<Integer> IN = new TreeSet<Integer>();
-		TreeSet<Integer> BN = new TreeSet<Integer>();
-		TreeSet<Integer> LN = new TreeSet<Integer>();
-		TreeSet<Integer> FL = new TreeSet<Integer>();
-		TreeSet<Integer> V = new TreeSet<Integer>();
-		initial_EV(E,V,input);
-		TreeSet<Integer> Free = new TreeSet<Integer>(V);
-		//Hashtable<Integer,TreeSet<Integer>> E = new Hashtable<Integer,TreeSet<Integer>>();
-		
-		//====================================
-		while(true)
-		//for(Integer vn: V)
+		IN.add(vn);
+		BN.addAll(E.get(vn));
+		Free.remove(vn);
+		Apply_Reduc_Rules(E,V,IN,LN,BN,FL,Free);//Reduce G according to the reduction rules
+		TreeSet<Integer> fUfl = new TreeSet<Integer>(FL);// Free union FL
+		fUfl.addAll(Free);
+		//if there is some unreachable v belongs Free union FL then return 0
+		Hashtable<Integer,Integer> visited = new Hashtable<Integer,Integer>();
+		Integer s = fUfl.first();//E.keys().nextElement();
+		for(Integer v:E.keySet())
+			visited.put(v, 0);
+		Queue<Integer> queue = new LinkedList<Integer>();
+		queue.add(s);
+		while(queue.size()!=0)
 		{
-			//IN.add(vn);
-			//BN.addAll(E.get(vn));
-			Apply_Reduc_Rules(E,V,IN,LN,BN,FL,Free);//Reduce G according to the reduction rules
-			TreeSet<Integer> fUfl = new TreeSet<Integer>(FL);// Free union FL
-			fUfl.addAll(Free);
-			//if there is some unreachable v belongs Free union FL then return 0
-			Hashtable<Integer,Integer> visited = new Hashtable<Integer,Integer>();
-			Integer s = fUfl.first();//E.keys().nextElement();
-			for(Integer v:E.keySet())
-				visited.put(v, 0);
-			Queue<Integer> queue = new LinkedList<Integer>();
-			queue.add(s);
-			while(queue.size()!=0)
+			Integer t = queue.poll();
+			visited.put(t, 1);
+			for(Integer n:E.get(t))
 			{
-				Integer t = queue.poll();
-				visited.put(t, 1);
-				for(Integer n:E.get(t))
-				{
-					if(visited.get(n)==0)
-						queue.add(n);
-				}
+				if(visited.get(n)==0)
+					queue.add(n);
 			}
-			/*for(Integer k:visited.keySet())
-			{
-				if(visited.get(k)==0)
-					return 0;
-			}*/
-			if(visited.contains(0))
+		}
+		/*for(Integer k:visited.keySet())
+		{
+			if(visited.get(k)==0)
 				return 0;
-			TreeSet<Integer> inUln = new TreeSet<Integer>(IN); // IN union LN
-			inUln.addAll(LN);
-			//if V = (IN union LN) then return |LN|
-			if(V.equals(inUln))  //?????????
+		}*/
+		if(visited.contains(0))
+			return 0;
+		TreeSet<Integer> inUln = new TreeSet<Integer>(IN); // IN union LN
+		inUln.addAll(LN);
+		//if V = (IN union LN) then return |LN|
+		if(V.equals(inUln))
+		{
+			return LN.size();
+		}
+		Integer max_dg_v = BN.first();  // v\\
+		int max_dg = get_degree(max_dg_v,E,V,IN,LN,BN,FL,Free);  // d(v)
+		//Choose a vertex v belongs BN of maximum degree
+		for(Integer v:BN)
+		{
+			int degree = get_degree(v,E,V,IN,LN,BN,FL,Free);
+			if(max_dg < degree)
 			{
-				return LN.size();
+				max_dg_v = v;
+				max_dg = degree;
 			}
-			Integer max_dg_v = BN.first();  // v\\
-			int max_dg = get_degree(max_dg_v,E,V,IN,LN,BN,FL,Free);  // d(v)
-			//Choose a vertex v belongs BN of maximum degree
-			for(Integer v:BN)
+		}
+		TreeSet<Integer> NvFL = new TreeSet<Integer>(FL);// NFL(v)
+		NvFL.retainAll(E.get(max_dg_v));
+		//if d(v)>=3 or (d(v)=2 and NFL(v)!=empty)
+		if(max_dg>=3 || (max_dg==2 && NvFL.size()!=0))
+		{
+			double n = Math.random();
+			if(n<=0.5)
+				LN.add(max_dg_v);
+			else
+				IN.add(max_dg_v);
+		}
+		else if(max_dg==2)
+		{
+			//Let{x1,x2} = Nfree(v) such that d(x1)<=d(x2)
+			TreeSet<Integer> NvFree = new TreeSet<Integer>(Free);//Nfree(v)
+			NvFree.retainAll(E.get(max_dg_v));
+			Integer x1,x2;
+			int first_deg = get_degree(NvFree.first(),E,V,IN,LN,BN,FL,Free);
+			int second_deg = get_degree(NvFree.last(),E,V,IN,LN,BN,FL,Free);
+			if(first_deg <= second_deg)
 			{
-				int degree = get_degree(v,E,V,IN,LN,BN,FL,Free);
-				if(max_dg < degree)
+				x1 = NvFree.first();
+				x2 = NvFree.last();
+			}
+			else
+			{
+				x1 = NvFree.last();
+				x2 = NvFree.first();
+				int temp_first = first_deg;
+				first_deg = second_deg;
+				second_deg = temp_first;
+			}
+			//=============================================
+			TreeSet<Integer> x1insectx2 = new TreeSet<Integer>(E.get(x1));  //N(x1) intersect N(x2)
+			x1insectx2.retainAll(E.get(x2));
+			TreeSet<Integer> x1insectx2FL = new TreeSet<Integer>(x1insectx2);  //(N(x1) intersect N(x2))\FL
+			x1insectx2FL.removeAll(FL);
+			TreeSet<Integer> x1insectx2FLv = new TreeSet<Integer>(x1insectx2FL);//(N(x1) intersect N(x2)) \FL \v
+			x1insectx2FLv.remove(max_dg_v);
+			TreeSet<Integer> NFLx1 = new TreeSet<Integer>(FL); //NFL(x1)
+			NFLx1.retainAll(E.get(x1));
+			TreeSet<Integer> NFLx2 = new TreeSet<Integer>(FL); //NFL(x2)
+			NFLx2.retainAll(E.get(x2));
+			TreeSet<Integer> NFLx1insetNFLx2 = new TreeSet<Integer>(NFLx1); //NFL(x1) intersect NFL(x2)
+			NFLx1insetNFLx2.retainAll(NFLx2);
+			TreeSet<Integer> Nx1unionNx2 = new TreeSet<Integer>(E.get(x1)); //Nx1 union Nx2
+			Nx1unionNx2.addAll(E.get(x2));
+			TreeSet<Integer> Nx1unionNx2insectFree = new TreeSet<Integer>(Nx1unionNx2);//Nx1 union Nx2 intersect Free
+			Nx1unionNx2insectFree.retainAll(Free);
+			if(Nx1unionNx2insectFree.contains(x1))
+				Nx1unionNx2insectFree.remove(x1);
+			if(Nx1unionNx2insectFree.contains(x2))
+				Nx1unionNx2insectFree.remove(x2);
+			
+			TreeSet<Integer>  Nx1unionNx2insectBN = new TreeSet<Integer>(Nx1unionNx2);//Nx1 union Nx2 intersect BN
+			Nx1unionNx2insectBN.retainAll(BN);
+			if(Nx1unionNx2insectBN.contains(x1))
+				Nx1unionNx2insectBN.remove(x1);
+			if(Nx1unionNx2insectBN.contains(x2))
+				Nx1unionNx2insectBN.remove(x2);
+			//===============================================
+			//if(d(x1)=2) then
+			//if(get_degree(x1,E,V,IN,LN,BN,FL,Free)==2)
+			if(first_deg == 2)
+			{
+				//Let{z} = N(x1)\{x}
+				TreeSet<Integer> Nx1 = new TreeSet<Integer>(E.get(x1));
+				Nx1.remove(max_dg_v);
+				Integer z = Nx1.first();
+				//if z belongs to Free then
+				if(Free.contains(z))
 				{
-					max_dg_v = v;
-					max_dg = degree;
+					//<v->LN||v->IN , x1->IN||v->IN, x1->LN>
+					double n = Math.random();
+					if(n <= 1/3)
+					{
+						LN.add(max_dg_v);
+					}
+					else if(n <= 2/3)
+					{
+						IN.add(max_dg_v);
+						IN.add(x1);
+					}
+					else
+					{
+						IN.add(max_dg_v);
+						LN.add(x1);
+					}
 				}
-			}
-			TreeSet<Integer> NvFL = new TreeSet<Integer>(FL);// NFL(v)
-			NvFL.retainAll(E.get(max_dg_v));
-			//if d(v)>=3 or (d(v)=2 and NFL(v)!=empty)
-			if(max_dg>=3 || (max_dg==2 && NvFL.size()!=0))
-			{
-				double n = Math.random();//?????????
-				if(n<=0.5)
-					LN.add(max_dg_v);
-				else
+				//else if z belongs FL then<v->IN>
+				else if(FL.contains(z))
 					IN.add(max_dg_v);
 			}
-			else if(max_dg==2)
-			{
-				//Let{x1,x2} = Nfree(v) such that d(x1)<=d(x2)
-				TreeSet<Integer> NvFree = new TreeSet<Integer>(Free);//Nfree(v)
-				NvFree.retainAll(E.get(max_dg_v));
-				Integer x1,x2;
-				int first_deg = get_degree(NvFree.first(),E,V,IN,LN,BN,FL,Free);
-				int second_deg = get_degree(NvFree.last(),E,V,IN,LN,BN,FL,Free);
-				if(first_deg <= second_deg)
-				{
-					x1 = NvFree.first();
-					x2 = NvFree.last();
-				}
-				else
-				{
-					x1 = NvFree.last();
-					x2 = NvFree.first();
-					int temp_first = first_deg;
-					first_deg = second_deg;
-					second_deg = temp_first;
-				}
-				//=============================================
-				TreeSet<Integer> x1insectx2 = new TreeSet<Integer>(E.get(x1));  //N(x1) intersect N(x2)
-				x1insectx2.retainAll(E.get(x2));
-				TreeSet<Integer> x1insectx2FL = new TreeSet<Integer>(x1insectx2);  //(N(x1) intersect N(x2))\FL
-				x1insectx2FL.removeAll(FL);
-				TreeSet<Integer> x1insectx2FLv = new TreeSet<Integer>(x1insectx2FL);//(N(x1) intersect N(x2)) \FL \v
-				x1insectx2FLv.remove(max_dg_v);
-				TreeSet<Integer> NFLx1 = new TreeSet<Integer>(FL); //NFL(x1)
-				NFLx1.retainAll(E.get(x1));
-				TreeSet<Integer> NFLx2 = new TreeSet<Integer>(FL); //NFL(x2)
-				NFLx2.retainAll(E.get(x2));
-				TreeSet<Integer> NFLx1insetNFLx2 = new TreeSet<Integer>(NFLx1); //NFL(x1) intersect NFL(x2)
-				NFLx1insetNFLx2.retainAll(NFLx2);
-				TreeSet<Integer> Nx1unionNx2 = new TreeSet<Integer>(E.get(x1)); //Nx1 union Nx2
-				Nx1unionNx2.addAll(E.get(x2));
-				TreeSet<Integer> Nx1unionNx2insectFree = new TreeSet<Integer>(Nx1unionNx2);//Nx1 union Nx2 intersect Free
-				Nx1unionNx2insectFree.retainAll(Free);
-				if(Nx1unionNx2insectFree.contains(x1))
-					Nx1unionNx2insectFree.remove(x1);
-				if(Nx1unionNx2insectFree.contains(x2))
-					Nx1unionNx2insectFree.remove(x2);
+			//else if(N(x1) intersect N(x2)\FL={v} and for all z beglongs (Nfl(x1) intersect Nfl(x2)),d(z)>=3 )
+			else{
 				
-				TreeSet<Integer>  Nx1unionNx2insectBN = new TreeSet<Integer>(Nx1unionNx2);//Nx1 union Nx2 intersect BN
-				Nx1unionNx2insectBN.retainAll(BN);
-				if(Nx1unionNx2insectBN.contains(x1))
-					Nx1unionNx2insectBN.remove(x1);
-				if(Nx1unionNx2insectBN.contains(x2))
-					Nx1unionNx2insectBN.remove(x2);
-				//===============================================
-				//if(d(x1)=2) then
-				//if(get_degree(x1,E,V,IN,LN,BN,FL,Free)==2)
-				if(first_deg == 2)
-				{
-					//Let{z} = N(x1)\{x}
-					TreeSet<Integer> Nx1 = new TreeSet<Integer>(E.get(x1));
-					Nx1.remove(max_dg_v);
-					Integer z = Nx1.first();
-					//if z belongs to Free then
-					if(Free.contains(z))
+				if(x1insectx2FLv.size()==0 && check1(NFLx1insetNFLx2,E,V,IN,LN,BN,FL,Free))
+				{		
+					double n = Math.random();
+					//v->LN
+					if(n<=0.25)
 					{
-						//<v->LN||v->IN , x1->IN||v->IN, x1->LN>
-						double n = Math.random();
-						if(n <= 1/3)
-						{
-							LN.add(max_dg_v);
-						}
-						else if(n <= 2/3)
-						{
-							IN.add(max_dg_v);
-							IN.add(x1);
-						}
-						else
-						{
-							IN.add(max_dg_v);
-							LN.add(x1);
-						}
+						LN.add(max_dg_v);
 					}
-					//else if z belongs FL then<v->IN>
-					else if(FL.contains(z))
+					//v->IN,x1 -> IN
+					else if(n<=0.5)
+					{
 						IN.add(max_dg_v);
-				}
-				//else if(N(x1) intersect N(x2)\FL={v} and for all z beglongs (Nfl(x1) intersect Nfl(x2)),d(z)>=3 )
-				else{
-					
-					if(x1insectx2FLv.size()==0 && check1(NFLx1insetNFLx2,E,V,IN,LN,BN,FL,Free))
-					{		
-						double n = Math.random();
-						//v->LN
-						if(n<=0.25)
-						{
-							LN.add(max_dg_v);
-						}
-						//v->IN,x1 -> IN
-						else if(n<=0.5)
-						{
-							IN.add(max_dg_v);
-							IN.add(x1);
-						}
-						//v->IN,x1->LN,x2->IN
-						else if(n<=0.75)
-						{
-							IN.add(max_dg_v);
-							LN.add(x1);
-							IN.add(x2);
-						}
-						//v->IN,x1->LN,x2->LN,Nfree(x1,x2)->FL,Nfree(x1,x2)->LN
-						else
-						{
-							IN.add(max_dg_v);
-							LN.add(x1);
-							LN.add(x2);
-							FL.addAll(Nx1unionNx2insectFree);
-							LN.addAll(Nx1unionNx2insectBN);
-						}
+						IN.add(x1);
 					}
-				//else if(N(x1) intersect N(x2)\FL!={v})
-					else if(x1insectx2FLv.size() != 0)
+					//v->IN,x1->LN,x2->IN
+					else if(n<=0.75)
 					{
-						double n = Math.random();
-						if(n<=1/3)
-						{
-							LN.add(max_dg_v);
-						}
-						else if(n<=2/3)
-						{
-							IN.add(max_dg_v);
-							IN.add(x1);
-							
-						}
-						else
-						{
-							IN.add(max_dg_v);
-							LN.add(x1);
-							IN.add(x2);
-						}
+						IN.add(max_dg_v);
+						LN.add(x1);
+						IN.add(x2);
+					}
+					//v->IN,x1->LN,x2->LN,Nfree(x1,x2)->FL,Nfree(x1,x2)->LN
+					else
+					{
+						IN.add(max_dg_v);
+						LN.add(x1);
+						LN.add(x2);
+						FL.addAll(Nx1unionNx2insectFree);
+						LN.addAll(Nx1unionNx2insectBN);
 					}
 				}
-			}
-			else if(max_dg==1)
-			{
-				ArrayList<Integer> P = new ArrayList<Integer>(max_path_Free(max_dg_v,E,V,IN,LN,BN,FL,Free));
-				TreeSet<Integer> P_set = new TreeSet<Integer>();
-				for(Integer node: P)
-					P_set.add(node);
-				TreeSet<Integer> Pk_nei_dis_P = new TreeSet<Integer>(E.get(P.get(P.size()-1)));
-				Pk_nei_dis_P.removeAll(P_set);
-				TreeSet<Integer> Z = Pk_nei_dis_P;
-				for(Integer z:Z)
+			//else if(N(x1) intersect N(x2)\FL!={v})
+				else if(x1insectx2FLv.size() != 0)
 				{
-					if(FL.contains(z) && get_degree(z,E,V,IN,LN,BN,FL,Free)==1)
+					double n = Math.random();
+					if(n<=1/3)
 					{
-						for(Integer node:P)
-							IN.add(node);
-						LN.add(z);
+						LN.add(max_dg_v);
 					}
-					else if(FL.contains(z) && get_degree(z,E,V,IN,LN,BN,FL,Free)>1)
+					else if(n<=2/3)
 					{
-						int i=0;
-						for(;i<P.size()-1;i++)
-						{
-							IN.add(P.get(i));
-						}
-						LN.add(P.get(i));	
+						IN.add(max_dg_v);
+						IN.add(x1);
+						
 					}
-					else if(BN.contains(z))
+					else
 					{
-						LN.add(P.get(0));
-					}
-					else if(Free.contains(z))
-					{
-						double n = Math.random();
-						if(n<=0.5)
-						{
-							for(int i=0 ;i<P.size();i++)
-							{
-								IN.add(P.get(i));
-							}
-							IN.add(z);
-						}
-						else
-						{
-							LN.add(P.get(0));
-						}
+						IN.add(max_dg_v);
+						LN.add(x1);
+						IN.add(x2);
 					}
 				}
 			}
 		}
-		//return E.size();
+		else if(max_dg==1)
+		{
+			ArrayList<Integer> P = new ArrayList<Integer>(max_path_Free(max_dg_v,E,V,IN,LN,BN,FL,Free));
+			TreeSet<Integer> P_set = new TreeSet<Integer>();
+			for(Integer node: P)
+				P_set.add(node);
+			TreeSet<Integer> Pk_nei_dis_P = new TreeSet<Integer>(E.get(P.get(P.size()-1)));
+			Pk_nei_dis_P.removeAll(P_set);
+			TreeSet<Integer> Z = Pk_nei_dis_P;
+			for(Integer z:Z)
+			{
+				if(FL.contains(z) && get_degree(z,E,V,IN,LN,BN,FL,Free)==1)
+				{
+					for(Integer node:P)
+						IN.add(node);
+					LN.add(z);
+				}
+				else if(FL.contains(z) && get_degree(z,E,V,IN,LN,BN,FL,Free)>1)
+				{
+					int i=0;
+					for(;i<P.size()-1;i++)
+					{
+						IN.add(P.get(i));
+					}
+					LN.add(P.get(i));	
+				}
+				else if(BN.contains(z))
+				{
+					LN.add(P.get(0));
+				}
+				else if(Free.contains(z))
+				{
+					double n = Math.random();
+					if(n<=0.5)
+					{
+						for(int i=0 ;i<P.size();i++)
+						{
+							IN.add(P.get(i));
+						}
+						IN.add(z);
+					}
+					else
+					{
+						LN.add(P.get(0));
+					}
+				}
+			}
+		}
+		return 0;   //!!!!!!!!!!!!!!!!!!!!!
 	}
 	public static void main(String[] args)
 	{
@@ -537,6 +524,7 @@ public class MLST {
 		for(int i=0;i<num_graphs;i++)
 			System.out.println(input.get(i));*/
 		//=============================================
+		
 		int num_edges = 0;
 		Hashtable<Integer,TreeSet<Integer>> E = new Hashtable<Integer,TreeSet<Integer>>();
 		ArrayList<String> test_input = new ArrayList<String>();
@@ -546,12 +534,25 @@ public class MLST {
 		test_input.add("3 4");
 		test_input.add("2 4");
 		test_input.add("1 4");
-		num_edges = mlst(test_input,E);    //why return int???
+		
+		TreeSet<Integer> IN = new TreeSet<Integer>();
+		TreeSet<Integer> BN = new TreeSet<Integer>();
+		TreeSet<Integer> LN = new TreeSet<Integer>();
+		TreeSet<Integer> FL = new TreeSet<Integer>();
+		TreeSet<Integer> V = new TreeSet<Integer>();
+		initial_EV(E,V,test_input);
+		TreeSet<Integer> Free = new TreeSet<Integer>(V);
+		for(Integer nv:V)
+		{
+			num_edges = mlst(nv,E,V,IN,LN,BN,FL,Free);
+			initial_EV(E,V,test_input);
+			Free = new TreeSet<Integer>(V);
+		}
 		System.out.println(num_edges);
 		
 	}
 
-
+//===============================helper functions====================================
 	public static boolean check1(TreeSet<Integer> NFLx1insetNFLx2,Hashtable<Integer,TreeSet<Integer>>E, TreeSet<Integer> V,TreeSet<Integer>IN,TreeSet<Integer>LN,TreeSet<Integer>BN,TreeSet<Integer>FL,TreeSet<Integer>Free)
 	{
 		if(NFLx1insetNFLx2.size()==0)

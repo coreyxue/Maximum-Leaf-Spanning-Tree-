@@ -267,13 +267,13 @@ public class MLST {
 	}
 	public static int mlst(Integer vn,Hashtable<Integer,TreeSet<Integer>> E, TreeSet<Integer> V,TreeSet<Integer>IN,TreeSet<Integer>LN,TreeSet<Integer>BN,TreeSet<Integer>FL,TreeSet<Integer>Free)
 	{
+		
+		IN.add(vn);
+		BN.addAll(E.get(vn));
+		Free.remove(vn);
+		Free.removeAll(BN);
 		while(true)
 		{
-			IN.add(vn);
-			BN.addAll(E.get(vn));
-			Free.remove(vn);
-			Free.removeAll(BN);
-			
 			Apply_Reduc_Rules(E,V,IN,LN,BN,FL,Free);//Reduce G according to the reduction rules
 			{
 				TreeSet<Integer> fUfl = new TreeSet<Integer>(FL);// Free union FL

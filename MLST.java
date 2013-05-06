@@ -100,7 +100,9 @@ public class MLST {
 		{
 			for(Integer v : E.get(u))
 			{
-				if(!temp.contains(v))		
+				//if(!temp.contains(v))
+				temp.retainAll(E.get(v));
+				if(temp.equals(E.get(v)))
 				{
 					FL.add(v);
 					Free.remove(v);
@@ -552,20 +554,21 @@ public class MLST {
 		return max_path;*/
 		ArrayList<Integer> max_path = new ArrayList<Integer>();
 		ArrayList<Integer> temp_max_path = new ArrayList<Integer>();
-		int max = 2;
-		int cur_len = 2;
+		//int max = 2;
+		//int cur_len = 2;
 		max_path.add(v);
 		temp_max_path.add(v);
 		Integer Nv = E.get(v).first();
 		max_path.add(Nv);
 		temp_max_path.add(Nv);
 		Hashtable<Integer,Integer> visited = new Hashtable<Integer,Integer>();
+		
 		if(Free.contains(Nv))
 		{
 			max_path.add(Nv);
 			temp_max_path.add(Nv);
-					//max = 2;
-					//cur_len = 2;
+			//max = 2;
+			//cur_len = 2;
 		}else{
 			return max_path;
 		}

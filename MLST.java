@@ -332,9 +332,11 @@ public class MLST {
 			{
 				double n = Math.random();
 				if(n<=0.5)
-					LN.add(max_dg_v);
+					//LN.add(max_dg_v);
+					ADD(max_dg_v,,LN,E,IN,BN,FL,Free);    //////////////////
 				else
-					IN.add(max_dg_v);
+					//IN.add(max_dg_v);
+					ADD(max_dg_v,,IN,E,IN,BN,FL,Free);    /////////////////
 			}
 			else if(max_dg==2)
 			{
@@ -401,22 +403,28 @@ public class MLST {
 						double n = Math.random();
 						if(n <= 1/3)
 						{
-							LN.add(max_dg_v);
+							//LN.add(max_dg_v);
+							ADD(max_dg_v,,LN,E,IN,BN,FL,Free);  //////////////////////////
 						}
 						else if(n <= 2/3)
 						{
-							IN.add(max_dg_v);
-							IN.add(x1);
+							//IN.add(max_dg_v);
+							ADD(max_dg_v,,IN,E,IN,BN,FL,Free);  /////////////////////
+							//IN.add(x1);
+							ADD(x1,,IN,E,IN,BN,FL,Free);   ///////////////////////
 						}
 						else
 						{
 							IN.add(max_dg_v);
-							LN.add(x1);
+							ADD(max_dg_v,,IN,E,IN,BN,FL,Free);   /////////////
+							//LN.add(x1);
+							ADD(x1,,LN,E,IN,BN,FL,Free);   ////////////////////
 						}
 					}
 					//else if z belongs FL then<v->IN>
 					else if(FL.contains(z))
-						IN.add(max_dg_v);
+						//IN.add(max_dg_v);
+						ADD(max_dg_v,,IN,E,IN,BN,FL,Free);   /////////////////////
 				}
 				//else if(N(x1) intersect N(x2)\FL={v} and for all z beglongs (Nfl(x1) intersect Nfl(x2)),d(z)>=3 )
 				else{
@@ -427,29 +435,38 @@ public class MLST {
 						//v->LN
 						if(n<=0.25)
 						{
-							LN.add(max_dg_v);
+							//LN.add(max_dg_v);
+							ADD(max_dg_v,,LN,E,IN,BN,FL,Free);   //////////////////////
 						}
 						//v->IN,x1 -> IN
 						else if(n<=0.5)
 						{
-							IN.add(max_dg_v);
-							IN.add(x1);
+							//IN.add(max_dg_v);
+							ADD(max_dg_v,,IN,E,IN,BN,FL,Free);   //////////////////
+							//IN.add(x1);
+							ADD(x1,,IN,E,IN,BN,FL,Free);    //////////////////
 						}
 						//v->IN,x1->LN,x2->IN
 						else if(n<=0.75)
 						{
-							IN.add(max_dg_v);
-							LN.add(x1);
-							IN.add(x2);
+							//IN.add(max_dg_v);
+							ADD(max_dg_v,,IN,E,IN,BN,FL,Free);   ////////////////////////
+							//LN.add(x1);
+							ADD(x1,,LN,E,IN,BN,FL,Free);    ///////////////////
+							//IN.add(x2);
+							ADD(x2,,IN,E,IN,BN,FL,Free);    /////////////////////
 						}
 						//v->IN,x1->LN,x2->LN,Nfree(x1,x2)->FL,Nfree(x1,x2)->LN
 						else
 						{
-							IN.add(max_dg_v);
-							LN.add(x1);
-							LN.add(x2);
-							FL.addAll(Nx1unionNx2insectFree);
-							LN.addAll(Nx1unionNx2insectBN);
+							//IN.add(max_dg_v);
+							ADD(max_dg_v,,IN,E,IN,BN,FL,Free);     //////////////////////
+							//LN.add(x1);
+							ADD(x1,,LN,E,IN,BN,FL,Free);    //////////////////
+							//LN.add(x2);
+							ADD(x2,,LN,E,IN,BN,FL,Free);     ////////////////
+							FL.addAll(Nx1unionNx2insectFree);  //????????
+							LN.addAll(Nx1unionNx2insectBN);  //???????????
 						}
 					}
 				//else if(N(x1) intersect N(x2)\FL!={v})
@@ -458,19 +475,25 @@ public class MLST {
 						double n = Math.random();
 						if(n<=1/3)
 						{
-							LN.add(max_dg_v);
+							//LN.add(max_dg_v);
+							ADD(max_dg_v,,LN,E,IN,BN,FL,Free);    /////////////////
 						}
 						else if(n<=2/3)
 						{
-							IN.add(max_dg_v);
-							IN.add(x1);
+							//IN.add(max_dg_v);
+							ADD(max_dg_v,,IN,E,IN,BN,FL,Free);    //////////////////
+							//IN.add(x1);
+							ADD(x1,,IN,E,IN,BN,FL,Free);     /////////////////
 							
 						}
 						else
 						{
-							IN.add(max_dg_v);
-							LN.add(x1);
-							IN.add(x2);
+							//IN.add(max_dg_v);
+							ADD(max_dg_v,,IN,E,IN,BN,FL,Free);     /////////////////
+							//LN.add(x1);
+							ADD(x1,,LN,E,IN,BN,FL,Free);         ////////////
+							//IN.add(x2);
+							ADD(x2,,IN,E,IN,BN,FL,Free);          ////////////////
 						}
 					}
 				}
@@ -489,21 +512,26 @@ public class MLST {
 					if(FL.contains(z) && get_degree(z,E,V,IN,LN,BN,FL,Free)==1)
 					{
 						for(Integer node:P)
-							IN.add(node);
-						LN.add(z);
+							//IN.add(node);
+							ADD(node,,IN,E,IN,BN,FL,Free);     ////////////////////
+						//LN.add(z);
+						ADD(z,,LN,E,IN,BN,FL,Free);     //////////////////////
 					}
 					else if(FL.contains(z) && get_degree(z,E,V,IN,LN,BN,FL,Free)>1)
 					{
 						int i=0;
 						for(;i<P.size()-1;i++)
 						{
-							IN.add(P.get(i));
+							//IN.add(P.get(i));
+							ADD(P.get(i),,LN,E,IN,BN,FL,Free);   /////////////////////
 						}
-						LN.add(P.get(i));	
+						//LN.add(P.get(i));
+						ADD(P.get(i),,LN,E,IN,BN,FL,Free);     /////////////////////
 					}
 					else if(BN.contains(z))
 					{
-						LN.add(P.get(0));
+						//LN.add(P.get(0));
+						ADD(P.get(0),,LN,E,IN,BN,FL,Free);     ///////////////////
 					}
 					else if(Free.contains(z))
 					{
@@ -512,17 +540,27 @@ public class MLST {
 						{
 							for(int i=0 ;i<P.size();i++)
 							{
-								IN.add(P.get(i));
+								//IN.add(P.get(i));
+								ADD(P.get(i),,IN,E,IN,BN,FL,Free);    ///////////////////
 							}
-							IN.add(z);
+							//IN.add(z);
+							ADD(z,,IN,E,IN,BN,FL,Free);     /////////////////////
 						}
 						else
 						{
-							LN.add(P.get(0));
+							//LN.add(P.get(0));
+							ADD(P.get(0),,LN,E,IN,BN,FL,Free);       ///////////////////
 						}
 					}
 				}
 			}
+			//update BN (gong jie rang wo delete)
+//			for(Integer bn:BN)
+//			{
+//				TreeSet<Integer> bnei = new TreeSet<Integer>(E.get(bn));
+//				bnei.removeAll(LN);
+//				E.put(bn, bnei);
+//			}
 		}
 		//return E.size();   //!!!!!!!!!!!!!!!!!!!!!
 	}
@@ -617,6 +655,28 @@ public class MLST {
 			{
 				max_path.add(nei);
 				explore1(nei, node, E,V,IN,LN,BN,FL,Free, max_path);
+			}
+		}
+	}
+	public static void ADD(Integer v,TreeSet<Integer>from,TreeSet<Integer>to,Hashtable<Integer,TreeSet<Integer>> E,TreeSet<Integer> IN,TreeSet<Integer>BN,TreeSet<Integer>FL,TreeSet<Integer>Free)
+	{
+		to.add(v);
+		from.remove(v);
+		TreeSet<Integer> NvinsectFree = new TreeSet<Integer>(Free);
+		NvinsectFree.retainAll(E.get(v));
+		TreeSet<Integer> NvinsectFL = new TreeSet<Integer>(FL);
+		NvinsectFL.retainAll(E.get(v));
+		if(to.equals(IN))
+		{
+			for(Integer y:NvinsectFree)
+			{
+				BN.add(y);
+				Free.remove(y);
+			}
+			for(Integer z:NvinsectFL)
+			{
+				IN.add(z);
+				FL.remove(z);
 			}
 		}
 	}

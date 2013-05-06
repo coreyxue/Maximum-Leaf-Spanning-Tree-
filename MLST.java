@@ -270,6 +270,8 @@ public class MLST {
 		IN.add(vn);
 		BN.addAll(E.get(vn));
 		Free.remove(vn);
+		Free.removeAll(BN);
+		
 		Apply_Reduc_Rules(E,V,IN,LN,BN,FL,Free);//Reduce G according to the reduction rules
 		TreeSet<Integer> fUfl = new TreeSet<Integer>(FL);// Free union FL
 		fUfl.addAll(Free);
@@ -514,7 +516,7 @@ public class MLST {
 				}
 			}
 		}
-		return 0;   //!!!!!!!!!!!!!!!!!!!!!
+		return E.size();   //!!!!!!!!!!!!!!!!!!!!!
 	}
 	public static void main(String[] args)
 	{
@@ -542,11 +544,23 @@ public class MLST {
 		TreeSet<Integer> V = new TreeSet<Integer>();
 		initial_EV(E,V,test_input);
 		TreeSet<Integer> Free = new TreeSet<Integer>(V);
+		int max_edges = 0;
+		Hashtable<Integer,TreeSet<Integer>>max_tree;
+
 		for(Integer nv:V)
 		{
 			num_edges = mlst(nv,E,V,IN,LN,BN,FL,Free);
+			if(max_edges<num_edges)
+			{
+				max_tree = new Hashtable<Integer,TreeSet<Integer>>(E);
+				max_edges = num_edges;
+			}
 			initial_EV(E,V,test_input);
 			Free = new TreeSet<Integer>(V);
+			IN = new TreeSet<Integer>();
+			BN = new TreeSet<Integer>();
+			LN = new TreeSet<Integer>();
+			FL = new TreeSet<Integer>();
 		}
 		System.out.println(num_edges);
 		

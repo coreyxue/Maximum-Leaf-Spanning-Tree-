@@ -177,8 +177,10 @@ public class MLST {
 				if(visited.contains(0))
 				{
 					//u--->IN
-					IN.add(u);
-					BN_copy.remove(u);
+					//IN.add(u);
+					//BN_copy.remove(u);
+					ADD(u,BN_copy,IN,E,IN,BN,FL,Free);
+					
 				}
 			}
 			BN = BN_copy;
@@ -333,10 +335,10 @@ public class MLST {
 				double n = Math.random();
 				if(n<=0.5)
 					//LN.add(max_dg_v);
-					ADD(max_dg_v,,LN,E,IN,BN,FL,Free);    //////////////////
+					ADD(max_dg_v,BN,LN,E,IN,BN,FL,Free);    //////////////////
 				else
 					//IN.add(max_dg_v);
-					ADD(max_dg_v,,IN,E,IN,BN,FL,Free);    /////////////////
+					ADD(max_dg_v,BN,IN,E,IN,BN,FL,Free);    /////////////////
 			}
 			else if(max_dg==2)
 			{
@@ -404,27 +406,27 @@ public class MLST {
 						if(n <= 1/3)
 						{
 							//LN.add(max_dg_v);
-							ADD(max_dg_v,,LN,E,IN,BN,FL,Free);  //////////////////////////
+							ADD(max_dg_v,BN,LN,E,IN,BN,FL,Free);  //////////////////////////
 						}
 						else if(n <= 2/3)
 						{
 							//IN.add(max_dg_v);
-							ADD(max_dg_v,,IN,E,IN,BN,FL,Free);  /////////////////////
+							ADD(max_dg_v,BN,IN,E,IN,BN,FL,Free);  /////////////////////
 							//IN.add(x1);
-							ADD(x1,,IN,E,IN,BN,FL,Free);   ///////////////////////
+							ADD(x1,Free,IN,E,IN,BN,FL,Free);   ///////////////////////
 						}
 						else
 						{
 							IN.add(max_dg_v);
-							ADD(max_dg_v,,IN,E,IN,BN,FL,Free);   /////////////
+							ADD(max_dg_v,BN,IN,E,IN,BN,FL,Free);   /////////////
 							//LN.add(x1);
-							ADD(x1,,LN,E,IN,BN,FL,Free);   ////////////////////
+							ADD(x1,Free,LN,E,IN,BN,FL,Free);   ////////////////////
 						}
 					}
 					//else if z belongs FL then<v->IN>
 					else if(FL.contains(z))
 						//IN.add(max_dg_v);
-						ADD(max_dg_v,,IN,E,IN,BN,FL,Free);   /////////////////////
+						ADD(max_dg_v,BN,IN,E,IN,BN,FL,Free);   /////////////////////
 				}
 				//else if(N(x1) intersect N(x2)\FL={v} and for all z beglongs (Nfl(x1) intersect Nfl(x2)),d(z)>=3 )
 				else{
@@ -436,37 +438,39 @@ public class MLST {
 						if(n<=0.25)
 						{
 							//LN.add(max_dg_v);
-							ADD(max_dg_v,,LN,E,IN,BN,FL,Free);   //////////////////////
+							ADD(max_dg_v,BN,LN,E,IN,BN,FL,Free);   //////////////////////
 						}
 						//v->IN,x1 -> IN
 						else if(n<=0.5)
 						{
 							//IN.add(max_dg_v);
-							ADD(max_dg_v,,IN,E,IN,BN,FL,Free);   //////////////////
+							ADD(max_dg_v,BN,IN,E,IN,BN,FL,Free);   //////////////////
 							//IN.add(x1);
-							ADD(x1,,IN,E,IN,BN,FL,Free);    //////////////////
+							ADD(x1,Free,IN,E,IN,BN,FL,Free);    //////////////////
 						}
 						//v->IN,x1->LN,x2->IN
 						else if(n<=0.75)
 						{
 							//IN.add(max_dg_v);
-							ADD(max_dg_v,,IN,E,IN,BN,FL,Free);   ////////////////////////
+							ADD(max_dg_v,BN,IN,E,IN,BN,FL,Free);   ////////////////////////
 							//LN.add(x1);
-							ADD(x1,,LN,E,IN,BN,FL,Free);    ///////////////////
+							ADD(x1,Free,LN,E,IN,BN,FL,Free);    ///////////////////
 							//IN.add(x2);
-							ADD(x2,,IN,E,IN,BN,FL,Free);    /////////////////////
+							ADD(x2,Free,IN,E,IN,BN,FL,Free);    /////////////////////
 						}
 						//v->IN,x1->LN,x2->LN,Nfree(x1,x2)->FL,Nfree(x1,x2)->LN
 						else
 						{
 							//IN.add(max_dg_v);
-							ADD(max_dg_v,,IN,E,IN,BN,FL,Free);     //////////////////////
+							ADD(max_dg_v,BN,IN,E,IN,BN,FL,Free);     //////////////////////
 							//LN.add(x1);
-							ADD(x1,,LN,E,IN,BN,FL,Free);    //////////////////
+							ADD(x1,Free,LN,E,IN,BN,FL,Free);    //////////////////
 							//LN.add(x2);
-							ADD(x2,,LN,E,IN,BN,FL,Free);     ////////////////
+							ADD(x2,Free,LN,E,IN,BN,FL,Free);     ////////////////
 							FL.addAll(Nx1unionNx2insectFree);  //????????
+							Free.removeAll(Nx1unionNx2insectFree);
 							LN.addAll(Nx1unionNx2insectBN);  //???????????
+							BN.removeAll(Nx1unionNx2insectBN);
 						}
 					}
 				//else if(N(x1) intersect N(x2)\FL!={v})
@@ -476,24 +480,24 @@ public class MLST {
 						if(n<=1/3)
 						{
 							//LN.add(max_dg_v);
-							ADD(max_dg_v,,LN,E,IN,BN,FL,Free);    /////////////////
+							ADD(max_dg_v,BN,LN,E,IN,BN,FL,Free);    /////////////////
 						}
 						else if(n<=2/3)
 						{
 							//IN.add(max_dg_v);
-							ADD(max_dg_v,,IN,E,IN,BN,FL,Free);    //////////////////
+							ADD(max_dg_v,BN,IN,E,IN,BN,FL,Free);    //////////////////
 							//IN.add(x1);
-							ADD(x1,,IN,E,IN,BN,FL,Free);     /////////////////
+							ADD(x1,Free,IN,E,IN,BN,FL,Free);     /////////////////
 							
 						}
 						else
 						{
 							//IN.add(max_dg_v);
-							ADD(max_dg_v,,IN,E,IN,BN,FL,Free);     /////////////////
+							ADD(max_dg_v,BN,IN,E,IN,BN,FL,Free);     /////////////////
 							//LN.add(x1);
-							ADD(x1,,LN,E,IN,BN,FL,Free);         ////////////
+							ADD(x1,Free,LN,E,IN,BN,FL,Free);         ////////////
 							//IN.add(x2);
-							ADD(x2,,IN,E,IN,BN,FL,Free);          ////////////////
+							ADD(x2,Free,IN,E,IN,BN,FL,Free);          ////////////////
 						}
 					}
 				}
@@ -513,9 +517,9 @@ public class MLST {
 					{
 						for(Integer node:P)
 							//IN.add(node);
-							ADD(node,,IN,E,IN,BN,FL,Free);     ////////////////////
+							ADD(node,Free,IN,E,IN,BN,FL,Free);     ////////////////////
 						//LN.add(z);
-						ADD(z,,LN,E,IN,BN,FL,Free);     //////////////////////
+						ADD(z,FL,LN,E,IN,BN,FL,Free);     //////////////////////
 					}
 					else if(FL.contains(z) && get_degree(z,E,V,IN,LN,BN,FL,Free)>1)
 					{
@@ -523,15 +527,15 @@ public class MLST {
 						for(;i<P.size()-1;i++)
 						{
 							//IN.add(P.get(i));
-							ADD(P.get(i),,LN,E,IN,BN,FL,Free);   /////////////////////
+							ADD(P.get(i),Free,LN,E,IN,BN,FL,Free);   /////////////////////
 						}
 						//LN.add(P.get(i));
-						ADD(P.get(i),,LN,E,IN,BN,FL,Free);     /////////////////////
+						ADD(P.get(i),Free,LN,E,IN,BN,FL,Free);     /////////////////////
 					}
 					else if(BN.contains(z))
 					{
 						//LN.add(P.get(0));
-						ADD(P.get(0),,LN,E,IN,BN,FL,Free);     ///////////////////
+						ADD(P.get(0),Free,LN,E,IN,BN,FL,Free);     ///////////////////
 					}
 					else if(Free.contains(z))
 					{
@@ -541,15 +545,15 @@ public class MLST {
 							for(int i=0 ;i<P.size();i++)
 							{
 								//IN.add(P.get(i));
-								ADD(P.get(i),,IN,E,IN,BN,FL,Free);    ///////////////////
+								ADD(P.get(i),Free,IN,E,IN,BN,FL,Free);    ///////////////////
 							}
 							//IN.add(z);
-							ADD(z,,IN,E,IN,BN,FL,Free);     /////////////////////
+							ADD(z,Free,IN,E,IN,BN,FL,Free);     /////////////////////
 						}
 						else
 						{
 							//LN.add(P.get(0));
-							ADD(P.get(0),,LN,E,IN,BN,FL,Free);       ///////////////////
+							ADD(P.get(0),Free,LN,E,IN,BN,FL,Free);       ///////////////////
 						}
 					}
 				}

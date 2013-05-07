@@ -12,7 +12,7 @@ public class MLST {
 		int current_bound = 2;
 		int next_bound = 2;
 		int num_lists = 0;
-		File file = new File("hard.in");
+		File file = new File("hard.all.v3.in");
 		BufferedReader reader = null;
 		try {
 			reader = new BufferedReader(new FileReader(file));
@@ -91,7 +91,7 @@ public class MLST {
 				{
 					LN.add(u);
 					BN_copy.remove(u);
-					Free.remove(u);
+					//Free.remove(u);
 				}
 			}
 			BN = BN_copy;
@@ -104,11 +104,12 @@ public class MLST {
 				if(get_degree(u,E,V,IN,LN,BN,FL,Free)==1)
 				{
 					FL.add(u);
-					BN.remove(u);
+					//BN.remove(u);
 					Free_copy.remove(u);
 				}
 			}
-			Free = Free_copy;
+			//Free = Free_copy;
+			Free = new TreeSet<Integer>(Free_copy);
 		}
 		//=================== RULE 4 ================
 		{
@@ -116,19 +117,18 @@ public class MLST {
 			TreeSet<Integer> Free_copy = new TreeSet<Integer>(Free);
 			temp.addAll(FL);
 			for(Integer u : Free)
-			{
-				for(Integer v : E.get(u))
+			{	//if(!temp.contains(v))
+				temp.retainAll(E.get(u));
+				//if(temp.equals(new TreeSet<Integer>()))
+				if(temp.size()==0)
 				{
-					//if(!temp.contains(v))
-					temp.retainAll(E.get(v));
-					if(temp.equals(E.get(v)))
-					{
-						FL.add(v);
-						Free_copy.remove(v);
-					}
+					FL.add(u);
+					Free_copy.remove(u);
 				}
+				
 			}
 			Free = new TreeSet<Integer>(Free_copy);
+			//Free = Free_copy;
 		}
 		//=================== RULE 5 ================
 		{
@@ -150,8 +150,8 @@ public class MLST {
 					}
 				}
 			}
-			//Free = new TreeSet<Integer>(Free_copy);
-			Free = Free_copy;
+			Free = new TreeSet<Integer>(Free_copy);
+			//Free = Free_copy;
 		}
 		//=================== RULE 6 ================
 		{
@@ -163,6 +163,7 @@ public class MLST {
 					visited.put(v, 0);
 				Queue<Integer> s = new LinkedList<Integer>();
 				s.add(E.get(u).first());
+				visited.put(u, 1);
 				visited.put(E.get(u).first(),1);
 				while(s.size()!=0)   //?????????????????
 				{
@@ -179,7 +180,7 @@ public class MLST {
 					//u--->IN
 					//IN.add(u);
 					//BN_copy.remove(u);
-					ADD(u,BN_copy,IN,E,IN,BN,FL,Free);
+					ADD(u,BN_copy,IN,E,IN,BN_copy,FL,Free);
 					
 				}
 			}
@@ -256,6 +257,8 @@ public class MLST {
 	}
 	public static void initial_EV(Hashtable<Integer,TreeSet<Integer>>E,TreeSet<Integer>V,ArrayList<String> input)
 	{
+		E.clear();
+		V.clear();
 		int num_edges = Integer.parseInt(input.get(0));
 		for(int i=1;i<=num_edges;i++)
 		{
@@ -276,7 +279,169 @@ public class MLST {
 		Free.removeAll(BN);
 		while(true)
 		{
-			Apply_Reduc_Rules(E,V,IN,LN,BN,FL,Free);//Reduce G according to the reduction rules
+			{
+				{
+					for(Integer u : FL)
+					{
+						TreeSet<Integer> nei_u = new TreeSet<Integer>(E.get(u));
+						for(Integer v:E.get(u))
+						{
+							if(FL.contains(v))
+							{
+								//E.get(u).remove(v);
+								//E.get(v).remove(u);
+								nei_u.remove(v);
+								nei_u.remove(u);
+							}
+						}
+						E.put(u, nei_u);
+					}
+					for(Integer u : BN)
+					{
+						TreeSet<Integer> nei_u = new TreeSet<Integer>(E.get(u));
+						for(Integer v:E.get(u))
+						{
+							if(BN.contains(v))
+							{
+								//E.get(u).remove(v);
+								//E.get(v).remove(u);
+								nei_u.remove(v);
+								nei_u.remove(u);
+							}
+						}
+						E.put(u, nei_u);
+					}
+				}
+				//==================== RULE 2 ============
+				{
+					TreeSet<Integer> BN_copy = new TreeSet<Integer>(BN);
+					for(Integer u : BN)
+					{
+						if(get_degree(u,E,V,IN,LN,BN,FL,Free)==0)
+						{
+							LN.add(u);
+							BN_copy.remove(u);
+							//Free.remove(u);
+						}
+					}
+					BN = BN_copy;
+				}
+				//=================== RULE 3 ================
+				{
+					TreeSet<Integer> Free_copy = new TreeSet<Integer>(Free);
+					for(Integer u : Free)
+					{
+						if(get_degree(u,E,V,IN,LN,BN,FL,Free)==1)
+						{
+							FL.add(u);
+							//BN.remove(u);
+							Free_copy.remove(u);
+						}
+					}
+					//Free = Free_copy;
+					Free = new TreeSet<Integer>(Free_copy);
+				}
+				//=================== RULE 4 ================
+				{
+					TreeSet<Integer> temp = new TreeSet<Integer>(Free);
+					TreeSet<Integer> Free_copy = new TreeSet<Integer>(Free);
+					temp.addAll(FL);
+					for(Integer u : Free)
+					{	//if(!temp.contains(v))
+						TreeSet<Integer> tempINSECTneiu= new TreeSet<Integer>(E.get(u));
+						tempINSECTneiu.retainAll(temp);
+						//if(temp.equals(new TreeSet<Integer>()))
+						if(tempINSECTneiu.size()==0)
+						{
+							FL.add(u);
+							Free_copy.remove(u);
+						}
+						
+					}
+					Free = new TreeSet<Integer>(Free_copy);
+					//Free = Free_copy;
+				}
+				//=================== RULE 5 ================
+				{
+					TreeSet<Integer> Free_copy = new TreeSet<Integer>(Free);
+					for(Integer x : Free)
+					{
+						if(get_degree(x,E,V,IN,LN,BN,FL,Free)==2)
+						{
+							for(Integer y: E.get(x))
+							{
+								for(Integer z: E.get(y))
+								{
+									if(E.get(z).contains(x))
+									{
+										FL.add(x);
+										Free_copy.remove(x);
+									}
+								}
+							}
+						}
+					}
+					Free = new TreeSet<Integer>(Free_copy);
+					//Free = Free_copy;
+				}
+				//=================== RULE 6 ================
+				{
+					Hashtable<Integer,Integer> visited = new Hashtable<Integer,Integer>();
+					TreeSet<Integer> BN_copy = new TreeSet<Integer>(BN);
+					for(Integer u:BN)
+					{
+						for(Integer v:E.keySet())
+							visited.put(v, 0);
+						Queue<Integer> s = new LinkedList<Integer>();
+						s.add(E.get(u).first());
+						visited.put(u, 1);
+						visited.put(E.get(u).first(),1);
+						while(s.size()!=0)   //?????????????????
+						{
+							Integer t = s.poll();
+							visited.put(t, 1);
+							for(Integer n:E.get(t))
+							{
+								if(n!=u && visited.get(n)==0)
+									s.add(n);
+							}
+						}
+						if(visited.contains(0))
+						{
+							//u--->IN
+							//IN.add(u);
+							//BN_copy.remove(u);
+							ADD(u,BN_copy,IN,E,IN,BN_copy,FL,Free);
+							
+						}
+					}
+					BN = BN_copy;
+				}
+				//=================== RULE 7 ================
+				{
+					TreeSet<Integer> tem = new TreeSet<Integer>(V);
+					tem.removeAll(IN);
+					for(Integer u : LN)
+					{
+						TreeSet<Integer> nei_u = new TreeSet<Integer>(E.get(u));
+						for(Integer v:E.get(u))
+						{
+							if(tem.contains(v))
+							{
+								//E.get(u).remove(v);
+								//E.get(v).remove(u);
+								nei_u.remove(v);
+								//nei_u.remove(u);
+								TreeSet<Integer> nei_v = new TreeSet<Integer>(E.get(v));
+								nei_v.remove(u);
+								E.put(v, nei_v);
+							}
+						}
+						E.put(u, nei_u);
+					}
+				}
+			}
+			//Apply_Reduc_Rules(E,V,IN,LN,BN,FL,Free);//Reduce G according to the reduction rules
 			{
 				TreeSet<Integer> fUfl = new TreeSet<Integer>(FL);// Free union FL
 				fUfl.addAll(Free);
@@ -524,11 +689,14 @@ public class MLST {
 					else if(FL.contains(z) && get_degree(z,E,V,IN,LN,BN,FL,Free)>1)
 					{
 						int i=0;
-						for(;i<P.size()-1;i++)
-						{
-							//IN.add(P.get(i));
-							ADD(P.get(i),Free,LN,E,IN,BN,FL,Free);   /////////////////////
-						}
+						if(P.size()==1)
+							ADD(P.get(0),Free,LN,E,IN,BN,FL,Free);
+						else
+							for(;i<P.size()-1;i++)
+							{
+								//IN.add(P.get(i));
+								ADD(P.get(i),Free,LN,E,IN,BN,FL,Free);   /////////////////////
+							}
 						//LN.add(P.get(i));
 						ADD(P.get(i),Free,LN,E,IN,BN,FL,Free);     /////////////////////
 					}
@@ -571,48 +739,73 @@ public class MLST {
 	public static void main(String[] args)
 	{
 		// read input file, generate input array
-		/*ArrayList<ArrayList<String>> input = new ArrayList<ArrayList<String>>();
+		ArrayList<ArrayList<String>> input = new ArrayList<ArrayList<String>>();
 		int num_graphs = read_input(input);
-		for(int i=0;i<num_graphs;i++)
-			System.out.println(input.get(i));*/
+		//for(int i=0;i<num_graphs;i++)
+			//System.out.println(input.get(i));
 		//=============================================
 		
-		int num_edges = 0;
+		int num_leaf = 0;
 		Hashtable<Integer,TreeSet<Integer>> E = new Hashtable<Integer,TreeSet<Integer>>();
-		ArrayList<String> test_input = new ArrayList<String>();
-		test_input.add("5");
-		test_input.add("1 2");
-		test_input.add("2 3");
-		test_input.add("3 4");
-		test_input.add("2 4");
-		test_input.add("1 4");
+//		ArrayList<String> input = new ArrayList<String>();
+//		input.add("10");
+//		input.add("0 2");
+//		input.add("0 3");
+//		input.add("0 4");
+//		input.add("1 2");
+//		input.add("2 3");
+//		input.add("3 4");
+//		input.add("0 1");
+//		input.add("0 5");
+//		input.add("5 6");
+//		input.add("4 6");
 		
-		TreeSet<Integer> IN = new TreeSet<Integer>();
-		TreeSet<Integer> BN = new TreeSet<Integer>();
-		TreeSet<Integer> LN = new TreeSet<Integer>();
-		TreeSet<Integer> FL = new TreeSet<Integer>();
-		TreeSet<Integer> V = new TreeSet<Integer>();
-		initial_EV(E,V,test_input);
-		TreeSet<Integer> Free = new TreeSet<Integer>(V);
-		int max_edges = 0;
-		Hashtable<Integer,TreeSet<Integer>>max_tree;
-
-		for(Integer nv:V)
+		//for(int i=0;i<3;i++)
 		{
-			num_edges = mlst(nv,E,V,IN,LN,BN,FL,Free);
-			if(max_edges<num_edges)
+			TreeSet<Integer> IN = new TreeSet<Integer>();
+			TreeSet<Integer> BN = new TreeSet<Integer>();
+			TreeSet<Integer> LN = new TreeSet<Integer>();
+			TreeSet<Integer> FL = new TreeSet<Integer>();
+			TreeSet<Integer> V = new TreeSet<Integer>();
+			initial_EV(E,V,input.get(2));
+			TreeSet<Integer> Free = new TreeSet<Integer>(V);
+			int max_leaf = 0;
+			
+			Hashtable<Integer,TreeSet<Integer>> E_copy = new Hashtable<Integer,TreeSet<Integer>>(E);
+			TreeSet<Integer> V_copy = new TreeSet<Integer>(V);
+			
+			Hashtable<Integer,TreeSet<Integer>>max_tree = new Hashtable<Integer,TreeSet<Integer>>();
+	
+			int counter=0;
+			for(Integer nv:V)
 			{
-				max_tree = new Hashtable<Integer,TreeSet<Integer>>(E);
-				max_edges = num_edges;
+				
+				num_leaf = mlst(nv,E,V,IN,LN,BN,FL,Free);
+				if(max_leaf<num_leaf)
+				{
+					max_tree = new Hashtable<Integer,TreeSet<Integer>>(E);
+					max_leaf = num_leaf;
+				}
+				counter++;
+				//initial_EV(E,V,input);
+				if(counter<V.size())
+				{
+					E= new Hashtable<Integer,TreeSet<Integer>>(E_copy);
+					V=new TreeSet<Integer>(V_copy);
+					Free = new TreeSet<Integer>(V);
+					IN = new TreeSet<Integer>();
+					BN = new TreeSet<Integer>();
+					LN = new TreeSet<Integer>();
+					FL = new TreeSet<Integer>();
+				}
+				
 			}
-			initial_EV(E,V,test_input);
-			Free = new TreeSet<Integer>(V);
-			IN = new TreeSet<Integer>();
-			BN = new TreeSet<Integer>();
-			LN = new TreeSet<Integer>();
-			FL = new TreeSet<Integer>();
+			for(Integer k:max_tree.keySet())
+			{
+				System.out.println(k.toString()+" "+max_tree.get(k).toString());
+			}
+			System.out.println(num_edges);
 		}
-		System.out.println(num_edges);
 		
 	}
 
